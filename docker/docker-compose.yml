@@ -1,0 +1,44 @@
+version: "3"
+services:
+    development:
+        build: .
+        container_name: app
+        depends_on:
+            - database
+        hostname: development
+        links:
+            - "database:database"
+        ports:
+            - "80:80"
+        networks:
+            - app-env
+        volumes:
+            - ../../laravel-restaurant:/var/www:cached
+            - ./apache/vhost.txt:/etc/apache2/sites-enabled/docker-php.conf:cached
+            - ./php/xdebug.ini:/etc/php/7.4/mods-available/xdebug.ini:cached
+            - ./php/cli/php.ini:/etc/php/7.4/cli/php.ini:cached
+            - ./php/fpm/php.ini:/etc/php/7.4/fpm/php.ini:cached
+    database:
+        image: mysql/mysql-server:5.7.29
+        container_name: database
+        environment:
+            - MYSQL_DATABASE=laravel
+            - MYSQL_USER=laravel
+            - MYSQL_PASSWORD=password
+            - MYSQL_ROOT_PASSWORD=password
+            - MYSQL_ROOT_HOST=%
+        ports:
+            - "3306:3306"
+        networks:
+            - app-env
+        hostname: database
+    mailhog:
+        image: mailhog/mailhog
+        ports:
+            - "1025:1025"
+            - "8025:8025"
+        networks:
+            - app-env
+
+networks:
+    app-env:
